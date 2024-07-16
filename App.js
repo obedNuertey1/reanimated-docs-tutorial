@@ -10,15 +10,19 @@ import { View, Button } from "react-native";
 
 export default function App() {
   /*A shared value is a react state which is automagically kept in sync between the javascript and the native side of your app*/
-  const width = useSharedValue(100);
+  const translateX = useSharedValue(0);
 
   const handlePress = () => {
-    width.value = withSpring(width.value + 50);
+    translateX.value += 50;
   }
 
   const handlePressNeg = () => {
-    width.value = withSpring(width.value - 50);
+    translateX.value -= 50;
   }
+
+  const animatedStyles = useAnimatedStyle(()=>({
+    transform: [{translateX: withSpring(translateX.value * 2)}],
+  }))
 
   return (
     <View
@@ -30,12 +34,13 @@ export default function App() {
       }}
     >
       <Animated.View
-      style={{
-        width: width,
-        height: 100,
-        backgroundColor: 'violet',
-        borderRadius: 10
-      }}
+      style={[{
+        width: 120,
+        height: 120,
+        backgroundColor: '#b58df1',
+        borderRadius: 20,
+        marginVertical: 50
+      }, animatedStyles]}
     />
     <View 
     style={{

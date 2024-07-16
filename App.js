@@ -1,44 +1,57 @@
-// Experimenting with useAnimatedProps
 import React from 'react';
-import {Button, View, StyleSheet} from 'react-native';
+import { StyleSheet, View, Text, Dimensions } from 'react-native';
 import Animated, {
   useSharedValue,
-  useAnimatedProps,
-  withTiming
+  useAnimatedStyle,
+  withTiming,
+  Easing,
+  withRepeat,
 } from 'react-native-reanimated';
-import {Svg, Circle} from 'react-native-svg';
 
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+const duration = 2000;
 
-export default function App(){
-  const r = useSharedValue(20);
+const {width} = Dimensions.get('window');
 
-  const handlePress = () => {
-    r.value += 10;
-  }
+export default function App() {
+  const defaultAnim = useSharedValue(width / 2 - 160);
+  const linear = useSharedValue(width / 2 - 160);
 
-  const decreasePress = () => {
-    r.value -= 10;
-  }
+  const animatedDefault = useAnimatedStyle(() => ({
+    transform: [{ translateX: defaultAnim.value }],
+  }));
+  const animatedChanged = useAnimatedStyle(() => ({
+    transform: [{ translateX: linear.value }],
+  }));
 
-  const animatedProps = useAnimatedProps(()=>({
-    r: withTiming(r.value)
-  }))
+  React.useEffect(() => {
+    linear.value = withRepeat(
+      // highlight-next-line
+      withTiming(-linear.value, {
+        duration,
+        easing: Easing.linear,
+      }),
+      -1,
+      true
+    );
+    defaultAnim.value = withRepeat(
+      // highlight-next-line
+      withTiming(-defaultAnim.value, {
+        duration,
+      }),
+      -1,
+      true
+    );
+  }, []);
 
   return (
     <View style={styles.container}>
-      <Svg style={styles.svg}>
-        <AnimatedCircle 
-          cx="50%"
-          cy="50%"
-          fill="#b58df1"
-          animatedProps={animatedProps}
-        />
-      </Svg>
-      <View style={{marginTop: 10, flexDirection: "row", gap: 10}}>
-        <Button onPress={handlePress} title="Click me" />
-        <Button onPress={decreasePress} title="Click to shrink" />
-      </View>
+      <Animated.View style={[styles.box, animatedDefault]}>
+        <Text style={styles.text}>inout</Text>
+      </Animated.View>
+
+      <Animated.View style={[styles.box, animatedChanged]}>
+        <Text style={styles.text}>linear</Text>
+      </Animated.View>
     </View>
   );
 }
@@ -47,71 +60,22 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    height: '100%',
   },
-  svg: {
-    height: 250,
-    width: '100%'
-  }
-})
-
-
-
-/* Experimenting with useAnimatedStyles */
-// import Animated, {
-//   useSharedValue,
-//   withTiming,
-//   useAnimatedStyle,
-//   Easing,
-//   withSpring
-// } from "react-native-reanimated";
-// import { View, Button } from "react-native";
-
-
-// export default function App() {
-//   /*A shared value is a react state which is automagically kept in sync between the javascript and the native side of your app*/
-//   const translateX = useSharedValue(0);
-
-//   const handlePress = () => {
-//     translateX.value += 50;
-//   }
-
-//   const handlePressNeg = () => {
-//     translateX.value -= 50;
-//   }
-
-//   const animatedStyles = useAnimatedStyle(()=>({
-//     transform: [{translateX: withSpring(translateX.value * 2)}],
-//   }))
-
-//   return (
-//     <View
-//       style={{
-//         flex: 1,
-//         alignItems: "center",
-//         justifyContent: "center",
-//         flexDirection: "column",
-//       }}
-//     >
-//       <Animated.View
-//       style={[{
-//         width: 120,
-//         height: 120,
-//         backgroundColor: '#b58df1',
-//         borderRadius: 20,
-//         marginVertical: 50
-//       }, animatedStyles]}
-//     />
-//     <View 
-//     style={{
-//       marginTop: 20,
-//       flexDirection: "row",
-//       gap: 4
-//     }}
-//     >
-//       <Button onPress={handlePress} title="Click me" />
-//       <Button onPress={handlePressNeg} title="Click me to decrease" />
-//     </View>
-//     </View>
-//   );
-// }
+  box: {
+    height: 80,
+    width: 80,
+    margin: 20,
+    borderWidth: 1,
+    borderColor: '#b58df1',
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  text: {
+    color: '#b58df1',
+    textTransform: 'uppercase',
+    fontWeight: 'bold',
+  },
+});

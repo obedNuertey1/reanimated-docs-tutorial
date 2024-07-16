@@ -3,22 +3,22 @@ import Animated, {
   withTiming,
   useAnimatedStyle,
   Easing,
+  withSpring
 } from "react-native-reanimated";
 import { View, Button } from "react-native";
 
-export default function AnimatedStyleUpdateExample(props) {
-  const randomWidth = useSharedValue(10);
 
-  const config = {
-    duration: 500,
-    easing: Easing.bezier(0.5, 0.01, 0, 1),
-  };
+export default function App() {
+  /*A shared value is a react state which is automagically kept in sync between the javascript and the native side of your app*/
+  const width = useSharedValue(100);
 
-  const style = useAnimatedStyle(() => {
-    return {
-      width: withTiming(randomWidth.value, config),
-    };
-  });
+  const handlePress = () => {
+    width.value = withSpring(width.value + 50);
+  }
+
+  const handlePressNeg = () => {
+    width.value = withSpring(width.value - 50);
+  }
 
   return (
     <View
@@ -30,17 +30,23 @@ export default function AnimatedStyleUpdateExample(props) {
       }}
     >
       <Animated.View
-        style={[
-          { width: 100, height: 80, backgroundColor: "black", margin: 30 },
-          style,
-        ]}
-      />
-      <Button
-        title="toggle"
-        onPress={() => {
-          randomWidth.value = Math.random() * 350;
-        }}
-      />
+      style={{
+        width: width,
+        height: 100,
+        backgroundColor: 'violet',
+        borderRadius: 10
+      }}
+    />
+    <View 
+    style={{
+      marginTop: 20,
+      flexDirection: "row",
+      gap: 4
+    }}
+    >
+      <Button onPress={handlePress} title="Click me" />
+      <Button onPress={handlePressNeg} title="Click me to decrease" />
+    </View>
     </View>
   );
 }

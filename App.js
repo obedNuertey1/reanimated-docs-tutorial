@@ -1,56 +1,45 @@
 import React from 'react';
-import { StyleSheet, View, Text, Dimensions } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  Easing,
-  withRepeat,
-} from 'react-native-reanimated';
-
-const duration = 2000;
+import {StyleSheet, View, Text, Dimensions} from 'react-native';
+import Animated, {useSharedValue, useAnimatedStyle, withSpring, withRepeat} from 'react-native-reanimated';
 
 const {width} = Dimensions.get('window');
 
-export default function App() {
+export default function App(){
   const defaultAnim = useSharedValue(width / 2 - 160);
-  const linear = useSharedValue(width / 2 - 160);
+  const changedAnim = useSharedValue(width / 2 - 160);
 
-  const animatedDefault = useAnimatedStyle(() => ({
-    transform: [{ translateX: defaultAnim.value }],
+  const animatedLinear = useAnimatedStyle(()=>({
+    transform: [{translateX: defaultAnim.value}]
   }));
-  const animatedChanged = useAnimatedStyle(() => ({
-    transform: [{ translateX: linear.value }],
-  }));
+  const animatedChanged = useAnimatedStyle(()=>({
+    transform: [{translateX: changedAnim.value}]
+  }))
 
-  React.useEffect(() => {
-    linear.value = withRepeat(
-      // highlight-next-line
-      withTiming(-linear.value, {
-        duration,
-        easing: Easing.linear,
-      }),
-      -1,
-      true
-    );
+  React.useEffect(()=>{
     defaultAnim.value = withRepeat(
-      // highlight-next-line
-      withTiming(-defaultAnim.value, {
-        duration,
+      withSpring(-defaultAnim.value, {stiffness: 100}),
+      -1,
+      true
+    );
+    changedAnim.value = withRepeat(
+      withSpring(-changedAnim.value, {
+        mass: 10,
+        damping: 10,
+        // stiffness: 50
       }),
       -1,
       true
     );
-  }, []);
+  },[]);
 
   return (
     <View style={styles.container}>
-      <Animated.View style={[styles.box, animatedDefault]}>
-        <Text style={styles.text}>inout</Text>
+      <Animated.View style={[styles.box, animatedLinear]}>
+        <Text style={styles.text}>Default</Text>
       </Animated.View>
 
       <Animated.View style={[styles.box, animatedChanged]}>
-        <Text style={styles.text}>linear</Text>
+        <Text style={styles.text}>Heavy</Text>
       </Animated.View>
     </View>
   );
@@ -76,6 +65,6 @@ const styles = StyleSheet.create({
   text: {
     color: '#b58df1',
     textTransform: 'uppercase',
-    fontWeight: 'bold',
-  },
-});
+    fontWeight: 'bold'
+  }
+})

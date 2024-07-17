@@ -1,46 +1,24 @@
+import Animated, {useSharedValue, withTiming, useAnimatedStyle, withRepeat} from 'react-native-reanimated';
+import {View, Button, StyleSheet} from 'react-native';
 import React from 'react';
-import {StyleSheet, View, Text, Dimensions} from 'react-native';
-import Animated, {useSharedValue, useAnimatedStyle, withSpring, withRepeat} from 'react-native-reanimated';
-
-const {width} = Dimensions.get('window');
 
 export default function App(){
-  const defaultAnim = useSharedValue(width / 2 - 160);
-  const changedAnim = useSharedValue(width / 2 - 160);
+  const offset = useSharedValue(0);
 
-  const animatedLinear = useAnimatedStyle(()=>({
-    transform: [{translateX: defaultAnim.value}]
-  }));
-  const animatedChanged = useAnimatedStyle(()=>({
-    transform: [{translateX: changedAnim.value}]
+  const style = useAnimatedStyle(()=>({
+    transform: [{translateX: offset.value}]
   }))
 
-  React.useEffect(()=>{
-    defaultAnim.value = withRepeat(
-      withSpring(-defaultAnim.value, {stiffness: 100}),
-      -1,
-      true
-    );
-    changedAnim.value = withRepeat(
-      withSpring(-changedAnim.value, {
-        mass: 10,
-        damping: 10,
-        // stiffness: 50
-      }),
-      -1,
-      true
-    );
-  },[]);
+  const OFFSET = 40;
+
+  const handlePress = () => {
+    offset.value = withRepeat(withTiming(OFFSET), -1, true);
+  }
 
   return (
     <View style={styles.container}>
-      <Animated.View style={[styles.box, animatedLinear]}>
-        <Text style={styles.text}>Default</Text>
-      </Animated.View>
-
-      <Animated.View style={[styles.box, animatedChanged]}>
-        <Text style={styles.text}>Heavy</Text>
-      </Animated.View>
+      <Animated.View style={[styles.box, style]} />
+      <Button title="shake" onPress={handlePress} />
     </View>
   );
 }
@@ -48,23 +26,15 @@ export default function App(){
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'center',
-    height: '100%',
+    justifyContent: 'center'
   },
   box: {
-    height: 80,
-    width: 80,
-    margin: 20,
-    borderWidth: 1,
-    borderColor: '#b58df1',
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  text: {
-    color: '#b58df1',
-    textTransform: 'uppercase',
-    fontWeight: 'bold'
+    width: 100,
+    height: 100,
+    margin: 50,
+    borderRadius: 15,
+    backgroundColor: '#b58df1'
   }
-})
+});

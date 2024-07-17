@@ -1,4 +1,4 @@
-import Animated, {useSharedValue, withTiming, useAnimatedStyle, withRepeat} from 'react-native-reanimated';
+import Animated, {useSharedValue, withTiming, useAnimatedStyle, withRepeat, withSequence, withDelay} from 'react-native-reanimated';
 import {View, Button, StyleSheet} from 'react-native';
 import React from 'react';
 
@@ -10,9 +10,21 @@ export default function App(){
   }))
 
   const OFFSET = 40;
+  const TIME = 250;
+  const DELAY = 400;
 
   const handlePress = () => {
-    offset.value = withRepeat(withTiming(OFFSET), -1, true);
+    offset.value = withDelay(
+      DELAY,
+      withSequence(
+        // start from -OFFSET
+        withTiming(-OFFSET, {duration: TIME / 2}),
+        // shake between -OFFSET and OFFSET 5 times
+        withRepeat(withTiming(OFFSET, {duration: TIME}), 5, true),
+        // go back to 0 at the end
+        withTiming(0, {duration: TIME / 2})
+      )
+    )
   }
 
   return (
